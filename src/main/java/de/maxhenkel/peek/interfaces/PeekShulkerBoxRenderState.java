@@ -17,4 +17,7 @@ public interface PeekShulkerBoxRenderState {
 
     void peek$setDisplayItem(@Nullable ItemStackRenderState displayItem);
 
+    int peek$getRotation();
+    void peek$setRotation(int rotation);
+
 }

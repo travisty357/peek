@@ -31,7 +31,7 @@ public class ShulkerRenderEvents {
         if (!(shulkerBoxRenderState instanceof PeekShulkerBoxRenderState peekState)) {
             throw new IllegalStateException("ShulkerBoxRenderState is not a PeekShulkerBoxRenderState");
         }
-        submitShulkerBoxLabel(shulkerBoxRenderState.direction, shulkerBoxRenderState.progress, peekState.peek$getDisplayItem(), peekState.peek$getLabel(), shulkerBoxRenderState.lightCoords, poseStack, submitNodeCollector);
+        submitShulkerBoxLabel(shulkerBoxRenderState.direction, shulkerBoxRenderState.progress, peekState.peek$getDisplayItem(), peekState.peek$getLabel(), peekState.peek$getRotation(), shulkerBoxRenderState.lightCoords, poseStack, submitNodeCollector);
     }
 
     public static void submitShulkerBoxItemLabel(ShulkerHintData shulkerHintData, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int light) {
@@ -39,11 +39,11 @@ public class ShulkerRenderEvents {
         poseStack.pushPose();
         poseStack.translate(-0.5F, 1.5F, 0.5F);
         poseStack.rotateAround(Axis.XP.rotationDegrees(180F), 1F, 0F, 0F);
-        submitShulkerBoxLabel(Direction.UP, 0F, itemStackRenderState, shulkerHintData.getLabelFormatted(), light, poseStack, submitNodeCollector);
+        submitShulkerBoxLabel(Direction.UP, 0F, itemStackRenderState, shulkerHintData.getLabelFormatted(), 0, light, poseStack, submitNodeCollector);
         poseStack.popPose();
     }
 
-    private static void submitShulkerBoxLabel(Direction direction, float progress, @Nullable ItemStackRenderState displayItem, @Nullable FormattedCharSequence label, int lightCoords, PoseStack poseStack, SubmitNodeCollector submitNodeCollector) {
+    private static void submitShulkerBoxLabel(Direction direction, float progress, @Nullable ItemStackRenderState displayItem, @Nullable FormattedCharSequence label, int rotation, int lightCoords, PoseStack poseStack, SubmitNodeCollector submitNodeCollector) {
         Minecraft mc = Minecraft.getInstance();
 
         poseStack.pushPose();
@@ -62,6 +62,7 @@ public class ShulkerRenderEvents {
                 poseStack.translate(0F, 2F / 16F, 0F);
                 poseStack.scale(12F / 16F, 12F / 16F, 12F / 16F);
             }
+            poseStack.rotate(Axis.ZP.rotationDegrees(rotation * 45F));
             displayItem.submit(poseStack, submitNodeCollector, lightCoords, OverlayTexture.NO_OVERLAY, 0);
             poseStack.popPose();
         }

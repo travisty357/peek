@@ -40,4 +40,17 @@ public class ShulkerBoxRenderStateMixin implements PeekShulkerBoxRenderState {
     public void peek$setDisplayItem(@Nullable ItemStackRenderState displayItem) {
         this.displayItem = displayItem;
     }
+
+    @Unique
+    private int rotation;
+
+    @Override
+    public int peek$getRotation() {
+        return rotation;
+    }
+
+    @Override
+    public void peek$setRotation(int rotation) {
+        this.rotation = rotation;
+    }
 }

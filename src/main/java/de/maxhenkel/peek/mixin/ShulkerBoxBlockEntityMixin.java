@@ -1,6 +1,7 @@
 package de.maxhenkel.peek.mixin;
 
 import de.maxhenkel.peek.Peek;
+import de.maxhenkel.peek.interfaces.PeekShulkerBoxBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -18,24 +19,60 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ShulkerBoxBlockEntity.class)
-public abstract class ShulkerBoxBlockEntityMixin extends RandomizableContainerBlockEntity implements WorldlyContainer {
+public abstract class ShulkerBoxBlockEntityMixin extends RandomizableContainerBlockEntity implements WorldlyContainer, PeekShulkerBoxBlockEntity {
+
+    @Unique
+    private static final String PEEK_ROTATION_KEY = "peek_lid_rotation";
+
+    @Unique
+    private static final int PEEK_ROTATION_STEPS = 8;
 
     @Unique
     @Nullable
     private CompoundTag lastData;
+
+    @Unique
+    private int peek$rotation;
 
     @Shadow
     private NonNullList<ItemStack> itemStacks;
 
     protected ShulkerBoxBlockEntityMixin(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
         super(blockEntityType, blockPos, blockState);
+    }
+
+    @Override
+    public int peek$getRotation() {
+        return peek$rotation;
+    }
+
+    @Override
+    public void peek$setRotation(int rotation) {
+        this.peek$rotation = Math.floorMod(rotation, PEEK_ROTATION_STEPS);
+        setChanged();
+    }
+
+    @Inject(method = "saveAdditional", at = @At("TAIL"))
+    private void peek$saveRotation(ValueOutput output, CallbackInfo ci) {
+        if (peek$rotation != 0) {
+            output.putInt(PEEK_ROTATION_KEY, peek$rotation);
+        }
+    }
+
+    @Inject(method = "loadAdditional", at = @At("TAIL"))
+    private void peek$loadRotation(ValueInput input, CallbackInfo ci) {
+        peek$rotation = Math.floorMod(input.getIntOr(PEEK_ROTATION_KEY, 0), PEEK_ROTATION_STEPS);
     }
 
     @Nullable

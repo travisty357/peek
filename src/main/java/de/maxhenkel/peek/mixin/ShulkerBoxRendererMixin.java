@@ -3,6 +3,7 @@ package de.maxhenkel.peek.mixin;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.maxhenkel.peek.Peek;
 import de.maxhenkel.peek.events.ShulkerRenderEvents;
+import de.maxhenkel.peek.interfaces.PeekShulkerBoxBlockEntity;
 import de.maxhenkel.peek.interfaces.PeekShulkerBoxRenderState;
 import de.maxhenkel.peek.utils.ItemRenderUtils;
 import de.maxhenkel.peek.utils.ShulkerHintData;
@@ -32,6 +33,7 @@ public abstract class ShulkerBoxRendererMixin implements BlockEntityRenderer<Shu
         if (!Peek.CONFIG.showShulkerBoxBlockHint.get()) {
             peekShulkerBoxRenderState.peek$setLabel(null);
             peekShulkerBoxRenderState.peek$setDisplayItem(null);
+            peekShulkerBoxRenderState.peek$setRotation(0);
             return;
         }
         ShulkerHintData shulkerHintData = ShulkerHintData.fromShulkerBox(shulkerBoxBlockEntity.getItems(), shulkerBoxBlockEntity.getCustomName());
@@ -40,6 +42,10 @@ public abstract class ShulkerBoxRendererMixin implements BlockEntityRenderer<Shu
         ItemStack displayItem = ShulkerRenderEvents.createShulkerRenderStack(shulkerHintData.getDisplayItem());
         ItemStackRenderState itemStackRenderState = ItemRenderUtils.fromStack(shulkerBoxBlockEntity.getLevel(), shulkerBoxBlockEntity.getBlockPos(), displayItem);
         peekShulkerBoxRenderState.peek$setDisplayItem(itemStackRenderState);
+
+        int rotation = shulkerBoxBlockEntity instanceof PeekShulkerBoxBlockEntity rotatable
+                ? rotatable.peek$getRotation() : 0;
+        peekShulkerBoxRenderState.peek$setRotation(rotation);
     }
 
     @Inject(method = "submit(Lnet/minecraft/client/renderer/blockentity/state/ShulkerBoxRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At("RETURN"))
